@@ -54,12 +54,12 @@ local function collectCoins()
                     targetCoin:Destroy()
                 end
 
-                wait(0.1)
+                wait(0.04)  -- скорость фарма (25 раз в секунду)
                 targetCoin.Touched:Connect(del)
             end
         end
 
-        wait(1)
+        wait(0.04)  -- скорость фарма
     end
 end
 
