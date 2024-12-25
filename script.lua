@@ -15,10 +15,11 @@ local PlayerTab = Window:CreateTab("Player", 4483362458)
 local isEspEnabled = false
 local espConnection
 
-VisualTab:CreateButton({
+VisualTab:CreateToggle({
     Name = "Esp Box",
-    Callback = function()
-        isEspEnabled = not isEspEnabled
+    Default = false,
+    Callback = function(State)
+        isEspEnabled = State
 
         if isEspEnabled then
             espConnection = game:GetService("RunService").Heartbeat:Connect(function()
@@ -53,10 +54,11 @@ VisualTab:CreateButton({
 local isAutoFarmEnabled = false
 local autoFarmConnection
 
-PlayerTab:CreateButton({
+PlayerTab:CreateToggle({
     Name = "Auto Farm Coins",
-    Callback = function()
-        isAutoFarmEnabled = not isAutoFarmEnabled
+    Default = false,
+    Callback = function(State)
+        isAutoFarmEnabled = State
 
         if isAutoFarmEnabled then
             autoFarmConnection = game:GetService("RunService").Heartbeat:Connect(function()
