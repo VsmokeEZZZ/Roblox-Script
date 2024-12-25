@@ -52,6 +52,7 @@ VisualTab:CreateToggle({
 })
 
 local isAutoFarmEnabled = false
+local autoFarmSpeed = 25
 local autoFarmConnection
 
 PlayerTab:CreateToggle({
@@ -81,9 +82,9 @@ PlayerTab:CreateToggle({
                     if nearestCoin then
                         local tweenService = game:GetService("TweenService")
                         local targetPosition = nearestCoin.Position + Vector3.new(0, 3, 0)
-                        local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+                        local tweenInfo = TweenInfo.new(autoFarmSpeed / 100, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
                         local tween = tweenService:Create(character.HumanoidRootPart, tweenInfo, {CFrame = CFrame.new(targetPosition)})
-
+                                
                         tween:Play()
                         tween.Completed:Wait()
                         nearestCoin:Destroy()
