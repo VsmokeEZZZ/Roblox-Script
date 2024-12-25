@@ -15,7 +15,6 @@ local PlayerTab = Window:CreateTab("Player", 4483362458)
 local isAutoFarmEnabled = false
 local isAntiAfkEnabled = false
 local farmSpeed = 25
-local antiAfkConnection
 local antiAfkLabel
 
 local isEspEnabled = false
@@ -99,11 +98,9 @@ PlayerTab:CreateButton({
         isAntiAfkEnabled = not isAntiAfkEnabled
 
         if isAntiAfkEnabled then
-            local vu = game:GetService("VirtualUser")
-            antiAfkConnection = game:GetService("Players").LocalPlayer.Idled:Connect(function()
-                vu:CaptureController()
-                vu:ClickButton2(Vector2.new(math.random(1, 500), math.random(1, 500)))
-            end)
+            for _, connection in pairs(getconnections(game:GetService("Players").LocalPlayer.Idled)) do
+                connection:Disable()
+            end
 
             if not antiAfkLabel then
                 local screenGui = Instance.new("ScreenGui")
@@ -120,9 +117,8 @@ PlayerTab:CreateButton({
                 antiAfkLabel.Font = Enum.Font.SourceSansBold
             end
         else
-            if antiAfkConnection then
-                antiAfkConnection:Disconnect()
-                antiAfkConnection = nil
+            for _, connection in pairs(getconnections(game:GetService("Players").LocalPlayer.Idled)) do
+                connection:Enable()
             end
 
             if antiAfkLabel then
