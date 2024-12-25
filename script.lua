@@ -13,45 +13,14 @@ local VisualTab = Window:CreateTab("Visual", 4483362458)
 local PlayerTab = Window:CreateTab("Player", 4483362458)
 
 local isAutoFarmEnabled = false
-local isAntiAfkEnabled = false
 local selectedFarmMode = "Basic"
-local farmSpeed = 25
-local antiAfkLabel
-local isEspEnabled = false
-local espConnection
 
-VisualTab:CreateButton({
-    Name = "ESP Box",
-    Callback = function()
-        isEspEnabled = not isEspEnabled
-
-        if isEspEnabled then
-            espConnection = game:GetService("RunService").Heartbeat:Connect(function()
-                for _, child in ipairs(workspace:GetDescendants()) do
-                    if child:FindFirstChild("Humanoid") then
-                        if not child:FindFirstChild("EspBox") and child ~= game.Players.LocalPlayer.Character then
-                            local esp = Instance.new("BoxHandleAdornment")
-                            esp.Adornee = child
-                            esp.Size = Vector3.new(4, 5, 1)
-                            esp.Transparency = 0.65
-                            esp.Color3 = Color3.fromRGB(255, 255, 255)
-                            esp.AlwaysOnTop = true
-                            esp.Name = "EspBox"
-                            esp.Parent = child
-                        end
-                    end
-                end
-            end)
-        else
-            if espConnection then
-                espConnection:Disconnect()
-            end
-            for _, child in ipairs(workspace:GetDescendants()) do
-                if child:FindFirstChild("EspBox") then
-                    child.EspBox:Destroy()
-                end
-            end
-        end
+PlayerTab:CreateDropdown({
+    Name = "Auto-Farm Mode",
+    Options = {"Basic", "Safe"},
+    CurrentOption = "Basic",
+    Callback = function(Value)
+        selectedFarmMode = Value
     end,
 })
 
@@ -67,7 +36,6 @@ PlayerTab:CreateButton({
                 if selectedFarmMode == "Safe" then
                     player.Character.Humanoid.Health = 0
                     player.CharacterAdded:Wait()
-
                     wait(1)
                     player.Character:WaitForChild("HumanoidRootPart").CFrame = CFrame.new(0, -100, 0)
                 end
@@ -76,7 +44,7 @@ PlayerTab:CreateButton({
                     local nearestCoin = nil
                     local shortestDistance = math.huge
 
-                    for _, obj in ipairs(game.Workspace:GetDescendants()) do
+                    for _, obj in ipairs(workspace:GetDescendants()) do
                         if obj:IsA("Part") and obj.Name == "Coin_Server" then
                             local distance = (player.Character.HumanoidRootPart.Position - obj.Position).Magnitude
                             if distance < shortestDistance then
@@ -92,57 +60,13 @@ PlayerTab:CreateButton({
                         elseif selectedFarmMode == "Safe" then
                             nearestCoin.CFrame = player.Character.HumanoidRootPart.CFrame
                         end
+                    else
+                        print("Монеты не найдены!")
                     end
 
                     wait(0.1)
                 end
             end)()
-        end
-    end,
-})
-
-PlayerTab:CreateDropdown({
-    Name = "Auto-Farm Mode",
-    Options = {"Basic", "Safe"},
-    CurrentOption = "Basic",
-    Callback = function(Value)
-        selectedFarmMode = Value
-    end,
-})
-
-PlayerTab:CreateButton({
-    Name = "Anti AFK",
-    Callback = function()
-        isAntiAfkEnabled = not isAntiAfkEnabled
-
-        if isAntiAfkEnabled then
-            for _, connection in pairs(getconnections(game:GetService("Players").LocalPlayer.Idled)) do
-                connection:Disable()
-            end
-
-            if not antiAfkLabel then
-                local screenGui = Instance.new("ScreenGui")
-                screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-                antiAfkLabel = Instance.new("TextLabel")
-                antiAfkLabel.Parent = screenGui
-                antiAfkLabel.Size = UDim2.new(0, 200, 0, 50)
-                antiAfkLabel.Position = UDim2.new(0.5, -100, 0.05, 0)
-                antiAfkLabel.BackgroundTransparency = 0.5
-                antiAfkLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-                antiAfkLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
-                antiAfkLabel.Text = "Anti AFK: Active"
-                antiAfkLabel.TextScaled = true
-                antiAfkLabel.Font = Enum.Font.SourceSansBold
-            end
-        else
-            for _, connection in pairs(getconnections(game:GetService("Players").LocalPlayer.Idled)) do
-                connection:Enable()
-            end
-
-            if antiAfkLabel then
-                antiAfkLabel:Destroy()
-                antiAfkLabel = nil
-            end
         end
     end,
 })
