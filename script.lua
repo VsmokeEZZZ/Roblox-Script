@@ -17,75 +17,60 @@ local player = game.Players.LocalPlayer
 local farmSpeed = 25
 local isAutoFarmEnabled = false
 local isAntiAfkEnabled = false
+local autoFarmMode = "Basic"
 local antiAfkLabel
 
-local isEspEnabled = false
-local espConnection
-VisualTab:CreateButton({
-    Name = "ESP Box",
-    Callback = function()
-        isEspEnabled = not isEspEnabled
-
-        if isEspEnabled then
-            espConnection = game:GetService("RunService").Heartbeat:Connect(function()
-                for _, child in ipairs(workspace:GetDescendants()) do
-                    if child:FindFirstChild("Humanoid") then
-                        if not child:FindFirstChild("EspBox") and child ~= game.Players.LocalPlayer.Character then
-                            local esp = Instance.new("BoxHandleAdornment")
-                            esp.Adornee = child
-                            esp.Size = Vector3.new(4, 5, 1)
-                            esp.Transparency = 0.65
-                            esp.Color3 = Color3.fromRGB(255, 255, 255)
-                            esp.AlwaysOnTop = true
-                            esp.Name = "EspBox"
-                            esp.Parent = child
-                        end
-                    end
-                end
-            end)
-        else
-            if espConnection then
-                espConnection:Disconnect()
-            end
-            for _, child in ipairs(workspace:GetDescendants()) do
-                if child:FindFirstChild("EspBox") then
-                    child.EspBox:Destroy()
-                end
-            end
-        end
+PlayerTab:CreateDropdown({
+    Name = "Farm Mode",
+    Options = {"Basic", "Safe"},
+    CurrentOption = "Basic",
+    Callback = function(Option)
+        autoFarmMode = Option
     end,
 })
 
 PlayerTab:CreateButton({
-    Name = "Auto Farm",
+    Name = "Toggle Auto Farm",
     Callback = function()
         isAutoFarmEnabled = not isAutoFarmEnabled
 
         if isAutoFarmEnabled then
+            player.Character.Humanoid.Health = 0
+            wait(5)
+
             coroutine.wrap(function()
                 while isAutoFarmEnabled do
-                    local nearestCoin = nil
-                    local shortestDistance = math.huge
+                    if autoFarmMode == "Basic" then
+                        local nearestCoin = nil
+                        local shortestDistance = math.huge
 
-                    for _, obj in ipairs(workspace:GetDescendants()) do
-                        if obj:IsA("Part") and obj.Name == "Coin_Server" then
-                            local distance = (player.Character.HumanoidRootPart.Position - obj.Position).Magnitude
-                            if distance < shortestDistance then
-                                shortestDistance = distance
-                                nearestCoin = obj
+                        for _, obj in ipairs(workspace:GetDescendants()) do
+                            if obj:IsA("Part") and obj.Name == "Coin_Server" then
+                                local distance = (player.Character.HumanoidRootPart.Position - obj.Position).Magnitude
+                                if distance < shortestDistance then
+                                    shortestDistance = distance
+                                    nearestCoin = obj
+                                end
                             end
                         end
-                    end
 
-                    if nearestCoin then
-                        local humanoidRootPart = player.Character:FindFirstChild("HumanoidRootPart")
-                        if humanoidRootPart then
-                            local targetPosition = nearestCoin.Position + Vector3.new(0, 3, 0)
-                            local tweenInfo = TweenInfo.new((humanoidRootPart.Position - targetPosition).Magnitude / farmSpeed, Enum.EasingStyle.Linear)
-                            local tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = CFrame.new(targetPosition)})
-                            tween:Play()
-                            tween.Completed:Wait()
-                            nearestCoin:Destroy()
+                        if nearestCoin then
+                            local humanoidRootPart = player.Character:FindFirstChild("HumanoidRootPart")
+                            if humanoidRootPart then
+                                local targetPosition = nearestCoin.Position + Vector3.new(0, 3, 0)
+                                local tweenInfo = TweenInfo.new((humanoidRootPart.Position - targetPosition).Magnitude / farmSpeed, Enum.EasingStyle.Linear)
+                                local tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = CFrame.new(targetPosition)})
+                                tween:Play()
+                                tween.Completed:Wait()
+                                nearestCoin:Destroy()
+                            end
+                        end
+                    elseif autoFarmMode == "Safe" then
+                        for _, obj in ipairs(workspace:GetDescendants()) do
+                            if obj:IsA("Part") and obj.Name == "Coin_Server" then
+                                obj.CFrame = player.Character.HumanoidRootPart.CFrame
+                                wait(0.1)
+                            end
                         end
                     end
 
