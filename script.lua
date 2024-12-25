@@ -12,9 +12,11 @@ local Window = Rayfield:CreateWindow({
 local VisualTab = Window:CreateTab("Visual", 4483362458)
 local PlayerTab = Window:CreateTab("Player", 4483362458)
 
+local TweenService = game:GetService("TweenService")
+local player = game.Players.LocalPlayer
+local farmSpeed = 25
 local isAutoFarmEnabled = false
 local isAntiAfkEnabled = false
-local farmSpeed = 25
 local antiAfkLabel
 
 local isEspEnabled = false
@@ -60,14 +62,12 @@ PlayerTab:CreateButton({
         isAutoFarmEnabled = not isAutoFarmEnabled
 
         if isAutoFarmEnabled then
-            local player = game.Players.LocalPlayer
-
             coroutine.wrap(function()
                 while isAutoFarmEnabled do
                     local nearestCoin = nil
                     local shortestDistance = math.huge
 
-                    for _, obj in ipairs(game.Workspace:GetDescendants()) do
+                    for _, obj in ipairs(workspace:GetDescendants()) do
                         if obj:IsA("Part") and obj.Name == "Coin_Server" then
                             local distance = (player.Character.HumanoidRootPart.Position - obj.Position).Magnitude
                             if distance < shortestDistance then
@@ -81,7 +81,11 @@ PlayerTab:CreateButton({
                         local humanoidRootPart = player.Character:FindFirstChild("HumanoidRootPart")
                         if humanoidRootPart then
                             local targetPosition = nearestCoin.Position + Vector3.new(0, 3, 0)
-                            humanoidRootPart.CFrame = humanoidRootPart.CFrame:lerp(CFrame.new(targetPosition), farmSpeed / 100)
+                            local tweenInfo = TweenInfo.new((humanoidRootPart.Position - targetPosition).Magnitude / farmSpeed, Enum.EasingStyle.Linear)
+                            local tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = CFrame.new(targetPosition)})
+                            tween:Play()
+                            tween.Completed:Wait()
+                            nearestCoin:Destroy()
                         end
                     end
 
