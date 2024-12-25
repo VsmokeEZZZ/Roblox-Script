@@ -73,7 +73,7 @@ local function toggleAutoFarm()
     end
 end
 
-PlayerTab:CreateButton({
+PlayerTab:CreateToggle({
     Name = "Auto-Farm",
     Position = UDim2.new(0, 0, 0, 0),  -- Размещение кнопки вверху
     Callback = function()
