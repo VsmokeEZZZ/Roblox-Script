@@ -12,64 +12,95 @@ local Window = Rayfield:CreateWindow({
 local VisualTab = Window:CreateTab("Visual", 4483362458)
 local PlayerTab = Window:CreateTab("Player", 4483362458)
 
-local isAutoFarmEnabled = false
-local selectedFarmMode = "Basic"
+local TweenService = game:GetService("TweenService")
+local player = game.Players.LocalPlayer
+local userInputService = game:GetService("UserInputService")
 
-PlayerTab:CreateDropdown({
-    Name = "Auto-Farm Mode",
-    Options = {"Basic", "Safe"},
-    CurrentOption = "Basic",
-    Callback = function(Value)
-        selectedFarmMode = Value
+local isFarmingEnabled = false
+local isEspEnabled = false
+
+local function getNearestCoin()
+    local nearestCoin = nil
+    local shortestDistance = math.huge
+
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("Part") and obj.Name == "Coin_Server" then
+            local distance = (player.Character.HumanoidRootPart.Position - obj.Position).magnitude
+            if distance < shortestDistance then
+                shortestDistance = distance
+                nearestCoin = obj
+            end
+        end
+    end
+
+    return nearestCoin
+end
+
+local function collectCoins()
+    while isFarmingEnabled do
+        local targetCoin = getNearestCoin()
+
+        if targetCoin then
+            local humanoidRootPart = player.Character:FindFirstChild("HumanoidRootPart")
+
+            if humanoidRootPart then
+                local targetPosition = targetCoin.Position + Vector3.new(0, 3, 0)
+                local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+                local tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = CFrame.new(targetPosition)})
+
+                tween:Play()
+
+                local function del()
+                    targetCoin:Destroy()
+                end
+
+                wait(0.1)
+                targetCoin.Touched:Connect(del)
+            end
+        end
+
+        wait(1)
+    end
+end
+
+local function enableESP()
+    while isEspEnabled do
+        for _, childrik in ipairs(workspace:GetDescendants()) do
+            if childrik:FindFirstChild("Humanoid") then
+                if not childrik:FindFirstChild("EspBox") then
+                    if childrik ~= game.Players.LocalPlayer.Character then
+                        local esp = Instance.new("BoxHandleAdornment", childrik)
+                        esp.Adornee = childrik
+                        esp.ZIndex = 0
+                        esp.Size = Vector3.new(4, 5, 1)
+                        esp.Transparency = 0.65
+                        esp.Color3 = Color3.fromRGB(255, 48, 48)
+                        esp.AlwaysOnTop = true
+                        esp.Name = "EspBox"
+                    end
+                end
+            end
+        end
+        wait(0.5)
+    end
+end
+
+PlayerTab:CreateButton({
+    Name = "Toggle Auto-Farm",
+    Callback = function()
+        isFarmingEnabled = not isFarmingEnabled
+        if isFarmingEnabled then
+            collectCoins()
+        end
     end,
 })
 
-PlayerTab:CreateButton({
-    Name = "Auto Farm",
+VisualTab:CreateButton({
+    Name = "Toggle ESP",
     Callback = function()
-        isAutoFarmEnabled = not isAutoFarmEnabled
-
-        if isAutoFarmEnabled then
-            local player = game.Players.LocalPlayer
-
-            coroutine.wrap(function()
-                while isAutoFarmEnabled do
-                    local nearestCoin = nil
-                    local shortestDistance = math.huge
-
-                    -- Нахождение ближайшей монеты
-                    for _, obj in ipairs(workspace:GetDescendants()) do
-                        if obj:IsA("Part") and obj.Name == "Coin_Server" then
-                            local distance = (player.Character.HumanoidRootPart.Position - obj.Position).Magnitude
-                            if distance < shortestDistance then
-                                shortestDistance = distance
-                                nearestCoin = obj
-                            end
-                        end
-                    end
-
-                    -- Логика для режимов фарма
-                    if nearestCoin then
-                        local humanoidRootPart = player.Character:FindFirstChild("HumanoidRootPart")
-                        if humanoidRootPart then
-                            if selectedFarmMode == "Basic" then
-                                humanoidRootPart.CFrame = nearestCoin.CFrame
-                            elseif selectedFarmMode == "Safe" then
-                                -- Перемещение персонажа под картой
-                                humanoidRootPart.CFrame = CFrame.new(nearestCoin.Position + Vector3.new(0, -100, 0))
-                                -- Притягивание монеты
-                                nearestCoin.CFrame = humanoidRootPart.CFrame
-                            end
-                        else
-                            warn("HumanoidRootPart не найден")
-                        end
-                    else
-                        print("Монеты не найдены!")
-                    end
-
-                    wait(0.1)
-                end
-            end)()
+        isEspEnabled = not isEspEnabled
+        if isEspEnabled then
+            enableESP()
         end
     end,
 })
@@ -97,3 +128,10 @@ PlayerTab:CreateSlider({
         game.Players.LocalPlayer.Character.Humanoid.JumpPower = Value
     end,
 })
+
+while game:GetService("RunService").RenderStepped:wait() do
+    if player.Character and player.Character:FindFirstChild("Humanoid") then
+        player.Character.Humanoid.WalkSpeed = 25
+        player.Character.Humanoid.JumpPower = 30
+    end
+end
