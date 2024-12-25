@@ -14,6 +14,7 @@ local PlayerTab = Window:CreateTab("Player", 4483362458)
 
 local isEspEnabled = false
 local espConnection
+local autoFarmSpeed = 25 -- фиксированная скорость полета
 
 VisualTab:CreateButton({
     Name = "Esp Box",
@@ -84,8 +85,10 @@ PlayerTab:CreateButton({
                     if targetCoin and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
                         local humanoidRootPart = player.Character.HumanoidRootPart
                         local tweenService = game:GetService("TweenService")
+                        local distance = (humanoidRootPart.Position - targetCoin.Position).Magnitude
+                        local tweenTime = distance / autoFarmSpeed -- рассчитываем время твина
                         local targetPosition = targetCoin.Position + Vector3.new(0, 3, 0)
-                        local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+                        local tweenInfo = TweenInfo.new(tweenTime, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
                         local tween = tweenService:Create(humanoidRootPart, tweenInfo, {CFrame = CFrame.new(targetPosition)})
 
                         tween:Play()
