@@ -37,7 +37,9 @@ PlayerTab:CreateButton({
                     player.Character.Humanoid.Health = 0
                     player.CharacterAdded:Wait()
                     wait(1)
-                    player.Character:WaitForChild("HumanoidRootPart").CFrame = CFrame.new(0, -100, 0)
+                    local humanoidRootPart = player.Character:WaitForChild("HumanoidRootPart")
+                    humanoidRootPart.CFrame = CFrame.new(0, -100, 0)
+                    player.Character:WaitForChild("Humanoid").PlatformStand = true
                 end
 
                 while isAutoFarmEnabled do
@@ -92,5 +94,28 @@ PlayerTab:CreateSlider({
     Flag = "Slider3",
     Callback = function(Value)
         game.Players.LocalPlayer.Character.Humanoid.JumpPower = Value
+    end,
+})
+
+VisualTab:CreateButton({
+    Name = "ESP Box",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+
+        for _, v in pairs(workspace:GetChildren()) do
+            if v:IsA("Model") and v:FindFirstChild("HumanoidRootPart") and v ~= player.Character then
+                local espBox = Instance.new("BillboardGui")
+                espBox.Adornee = v.HumanoidRootPart
+                espBox.Size = UDim2.new(0, 200, 0, 200)
+                espBox.StudsOffset = Vector3.new(0, 3, 0)
+                espBox.Parent = v
+
+                local frame = Instance.new("Frame")
+                frame.Size = UDim2.new(1, 0, 1, 0)
+                frame.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+                frame.BorderSizePixel = 0
+                frame.Parent = espBox
+            end
+        end
     end,
 })
