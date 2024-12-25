@@ -12,9 +12,14 @@ local Window = Rayfield:CreateWindow({
 local VisualTab = Window:CreateTab("Visual", 4483362458)
 local PlayerTab = Window:CreateTab("Player", 4483362458)
 
+local isAutoFarmEnabled = false
+local isAntiAfkEnabled = false
+local farmSpeed = 25
+local antiAfkConnection
+local antiAfkLabel
+
 local isEspEnabled = false
 local espConnection
-
 VisualTab:CreateButton({
     Name = "ESP Box",
     Callback = function()
@@ -49,33 +54,6 @@ VisualTab:CreateButton({
         end
     end,
 })
-
-PlayerTab:CreateSlider({
-    Name = "WalkSpeed",
-    Range = {10, 100},
-    Increment = 1,
-    Suffix = "Speed",
-    CurrentValue = 10,
-    Flag = "Slider1",
-    Callback = function(Value)
-        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
-    end,
-})
-
-PlayerTab:CreateSlider({
-    Name = "Jump Height",
-    Range = {10, 500},
-    Increment = 1,
-    Suffix = "Height",
-    CurrentValue = 10,
-    Flag = "Slider3",
-    Callback = function(Value)
-        game.Players.LocalPlayer.Character.Humanoid.JumpPower = Value
-    end,
-})
-
-local isAutoFarmEnabled = false
-local farmSpeed = 25
 
 PlayerTab:CreateButton({
     Name = "Auto Farm",
@@ -114,10 +92,6 @@ PlayerTab:CreateButton({
         end
     end,
 })
-
-local isAntiAfkEnabled = false
-local antiAfkConnection
-local antiAfkLabel
 
 PlayerTab:CreateButton({
     Name = "Anti AFK",
